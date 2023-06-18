@@ -1,4 +1,3 @@
-use crate::parser::parser::RuleCtx;
 use regex::Regex;
 
 pub struct Grammar {
@@ -30,31 +29,18 @@ impl Grammar {
     }
 }
 
-impl Clone for Grammar {
-    fn clone(&self) -> Self {
-        Grammar {
-            lexer_rules: self.lexer_rules.clone(),
-            parser_rules: self.parser_rules.clone()
-        }
-    }
-}
-
-#[derive(Clone)]
 pub enum Rule {
     Lexer(LexerRule),
     Parser(ParserRule)
 }
 
-#[derive(Clone)]
 pub enum LexerRule {
     Match(String),
     RegexMatch(Regex),
-    Ignore(String),
+    Ignore(Regex),
     Capture(Regex, usize),
-    Assert(bool, Box<LexerRule>)
 }
 
-#[derive(Clone)]
 pub enum ParserRule {
     Match(Vec<Rule>)
 }

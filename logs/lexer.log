@@ -1,1 +1,11 @@
-Attempting to regex match: let
+Beginning tokenizing stream:
+"letlet;let"
+
+Matched: 'letlet' to '^(?:let)+'
+Substream: ";let"
+
+Matched: ';' to '^;'
+Substream: "let"
+
+Matched: 'let' to '^(?:let)+'
+Reached end of stream

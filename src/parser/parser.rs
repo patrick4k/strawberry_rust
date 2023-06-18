@@ -1,31 +1,38 @@
 use std::fs::File;
-use crate::lexer::grammar::{Grammar, Rule};
+use std::rc::Rc;
+use crate::grammar::grammar::Grammar;
+use crate::lexer::lexer::Token;
 use crate::logger::logger::Logger;
 
 pub struct Parser {
-    grammar: Grammar,
+    grammar: Rc<Grammar>,
     logger: Logger
 }
 
 // TODO: Implement Parser
 impl Parser {
-    pub fn new() -> Parser {
-        Parser {
-            grammar: Grammar::new(),
-            logger: Logger::new_console()
-        }
-    }
 
-    pub fn new_log_to_file(grammar: Grammar, filename: &str) -> Parser {
+    pub fn new_log_to_file(grammar: Rc<Grammar>, filename: &str) -> Parser {
         Parser {
             grammar,
             logger: Logger::new(File::create(filename).unwrap())
         }
     }
+
+    pub fn parse<T>(&mut self, stream: Vec<Token>) -> ParseResult<T> {
+        ParseResult::Failure(String::from("Parser not implemented"))
+    }
+
+    pub fn visit<T>(&self, rule: Box<dyn RuleCtx<T>>) -> T {
+        rule.visit()
+    }
 }
 
-pub trait RuleCtx {
-    fn get_children(&self) -> Vec<Box<dyn RuleCtx>>;
-    fn get_text(&self) -> &str;
-    fn get_rule(&self) -> Rule;
+pub enum ParseResult<T> {
+    Success(Vec<Box<dyn RuleCtx<T>>>),
+    Failure(String)
+}
+
+pub trait RuleCtx<T> {
+    fn visit(&self) -> T;
 }

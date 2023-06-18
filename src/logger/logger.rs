@@ -18,6 +18,10 @@ impl Logger {
         }
     }
 
+    pub fn new_file(filename: &str) -> Logger {
+        Logger::new(std::fs::File::create(filename).unwrap())
+    }
+
     pub fn log(&mut self, message: &str) {
         self.out.write(message.as_bytes()).unwrap();
     }

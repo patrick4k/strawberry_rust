@@ -1,7 +1,8 @@
+use std::rc::Rc;
 use regex::Regex;
-use crate::lexer::grammar::{Grammar, LexerRule, Rule};
-use crate::lexer::lexer::Lexer;
-use crate::parser::parser::Parser;
+use crate::grammar::grammar::{Grammar, LexerRule, Rule};
+use crate::lexer::lexer::{Lexer, Token, TokenizeResult};
+use crate::parser::parser::{Parser, ParseResult};
 
 pub struct Interpreter {
     lexer: Lexer,
@@ -12,41 +13,58 @@ impl Interpreter {
 
     pub fn new() -> Interpreter {
         let logs = ("logs\\lexer.log", "logs\\parser.log");
-        let grammar = strawberry_grammar();
+        let grammar = Rc::new(strawberry_grammar());
         Interpreter {
-            lexer: Lexer::new_log_to_file(grammar.clone(), logs.0),
-            parser: Parser::new_log_to_file(grammar, logs.1)
+            lexer: Lexer::new_log_to_file(Rc::clone(&grammar), logs.0),
+            parser: Parser::new_log_to_file(Rc::clone(&grammar), logs.1)
         }
     }
 
-    pub fn new_thread(&mut self, stream: &str) {
-        self.lexer.tokenize(stream);
+    pub fn execute(&mut self, stream: &str) {
+        self.lex(stream);
     }
-}
 
-struct RetVal {
-    value: String
+    fn lex(&mut self, stream: &str) {
+        let tokenized_result = self.lexer.tokenize(stream);
+        match tokenized_result {
+            TokenizeResult::Success(tokens) => {
+                self.parse(tokens);
+            }
+            TokenizeResult::Failure(err) => {
+                println!("{}", err);
+            }
+        }
+    }
+
+    fn parse(&mut self, tokens: Vec<Token>) {
+        let parsed_result: ParseResult<f32> = self.parser.parse(tokens);
+        match parsed_result {
+            ParseResult::Success(rules) => {
+                for rule in rules {
+                    // TODO: Implement async on visit
+                    self.parser.visit(rule);
+                }
+            }
+            ParseResult::Failure(err) => {
+                println!("ERROR: {}", err);
+            }
+        }
+    }
 }
 
 fn strawberry_grammar() -> Grammar {
     let mut grammar = Grammar::new();
     let lexer_rules: Vec<&str> = vec![
-        "let", // Let
-        r"[a-zA-Z](?:\w|_)*", // Identifier
+        "(?:let)+", // Lets
+        r"[a-zA-Z](\w|_)*", // Identifier
         "=", // Equals
         ";", // Semicolon
     ];
 
     for rule in lexer_rules {
-        let re = Regex::new(rule).unwrap();
+        let re = Regex::new(&*("^".to_owned() + rule)).unwrap();
         let lr = LexerRule::RegexMatch(re);
         grammar.add_rule(Rule::Lexer(lr));
     }
-
     grammar
-}
-
-fn strawberry_parser() -> Parser {
-    // TODO: Build parser
-    Parser::new()
 }

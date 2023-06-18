@@ -1,12 +1,13 @@
 use std::env;
 use regex::Regex;
 use strawberry::interpreter::Interpreter;
-use crate::lexer::grammar::Grammar;
+use crate::grammar::grammar::Grammar;
 use crate::lexer::lexer::Lexer;
 
 mod lexer;
 mod logger;
 mod parser;
+mod grammar;
 mod strawberry;
 
 fn main() {
@@ -20,5 +21,5 @@ fn main() {
         // TODO: interpreter.process_arg(arg);
     }
 
-    interpreter.new_thread("letletlet");
+    interpreter.execute("letlet;let");
 }
