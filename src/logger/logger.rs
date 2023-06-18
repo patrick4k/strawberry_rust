@@ -1,12 +1,18 @@
-use std::io::Write;
+use std::io::{stdout, Write};
 
 pub struct Logger {
     out: Box<dyn Write>
 }
 
 impl Logger {
-    pub fn new<T>(out: T) -> Logger
-        where T: Write + 'static {
+
+    pub fn new_console() -> Logger {
+        Logger {
+            out: Box::new(stdout())
+        }
+    }
+
+    pub fn new<T>(out: T) -> Logger where T: Write + 'static {
         Logger {
             out: Box::new(out)
         }

@@ -1,7 +1,8 @@
 use std::env;
+use regex::Regex;
 use strawberry::interpreter::Interpreter;
 use crate::lexer::grammar::Grammar;
-use crate::lexer::tokenizer::Tokenizer;
+use crate::lexer::lexer::Lexer;
 
 mod lexer;
 mod logger;
@@ -19,5 +20,5 @@ fn main() {
         // TODO: interpreter.process_arg(arg);
     }
 
-    interpreter.new_thread("lexer log");
+    interpreter.new_thread("letletlet");
 }
