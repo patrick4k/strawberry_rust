@@ -4,35 +4,41 @@ use crate::grammar::grammar::Grammar;
 use crate::lexer::lexer::Token;
 use crate::logger::logger::Logger;
 
-pub struct Parser {
-    grammar: Rc<Grammar>,
-    logger: Logger
+pub enum Rule {
+    Visitable(String),
+    NonVisitable,
+    Ignore
 }
 
-// TODO: Implement Parser
-impl Parser {
-
-    pub fn new_log_to_file(grammar: Rc<Grammar>, filename: &str) -> Parser {
-        Parser {
-            grammar,
-            logger: Logger::new(File::create(filename).unwrap())
-        }
-    }
-
-    pub fn parse<T>(&mut self, stream: Vec<Token>) -> ParseResult<T> {
-        ParseResult::Failure(String::from("Parser not implemented"))
-    }
-
-    pub fn visit<T>(&self, rule: Box<dyn RuleCtx<T>>) -> T {
-        rule.visit()
-    }
+pub enum MatchResult {
+    Matched(Rule),
+    NotMatched
 }
 
-pub enum ParseResult<T> {
-    Success(Vec<Box<dyn RuleCtx<T>>>),
+pub enum ParseResult {
+    Success(Vec<RuleCtx>),
     Failure(String)
 }
 
-pub trait RuleCtx<T> {
-    fn visit(&self) -> T;
+pub struct RuleCtx {
+    pub(crate) rule: Rule,
+    text: String,
+    pub(crate) children: Vec<RuleCtx>,
+}
+
+pub struct Parser {
+    grammar: Rc<Grammar>,
+}
+
+impl Parser {
+
+    pub fn new(grammar: Rc<Grammar>) -> Parser {
+        Parser {
+            grammar
+        }
+    }
+
+    pub fn parse(&self, stream: Vec<Token>) -> ParseResult {
+        ParseResult::Failure(String::from("Parser not implemented"))
+    }
 }

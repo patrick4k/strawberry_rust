@@ -1,19 +1,21 @@
 use std::env;
 use regex::Regex;
-use strawberry::interpreter::Interpreter;
+use strawberry::StrawberryInterpreter::StrawberryInterpreter;
 use crate::grammar::grammar::Grammar;
+use crate::interpreter::interpreter::Interpreter;
 use crate::lexer::lexer::Lexer;
 
 mod lexer;
 mod logger;
 mod parser;
 mod grammar;
+mod interpreter;
 mod strawberry;
 
 fn main() {
 
     // Init Interpreter
-    let mut interpreter = Interpreter::new();
+    let mut interpreter = StrawberryInterpreter::new();
 
     // Process args
     let args: Vec<_> = env::args().collect();
@@ -21,5 +23,5 @@ fn main() {
         // TODO: interpreter.process_arg(arg);
     }
 
-    interpreter.execute("letlet;let");
+    interpreter.execute_from_file(r"C:\Users\Patrick\Documents\Code\Strawberry\strawberry_rust\test\test_stream.sb");
 }

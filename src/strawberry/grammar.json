@@ -1,0 +1,50 @@
+{
+  "lexer_rules": [
+    {
+      "name": "comment",
+      "method": "Ignore",
+      "pattern": "(?://.*|/\\*.*?\\*/)"
+    },
+    {
+      "name": "string",
+      "method": "RegexMatch",
+      "pattern": "\".*?\""
+    },
+    {
+      "name": "int",
+      "method": "RegexMatch",
+      "pattern": "\\d+"
+    },
+    {
+      "name": "double",
+      "method": "RegexMatch",
+      "pattern": "-?$int?\\.$int"
+    },
+    {
+      "name": "scientific notation",
+      "method": "RegexMatch",
+      "pattern": "(?:$double|$int)[eE][+-]?$int"
+    },
+    {
+      "name": "identifier",
+      "method": "RegexMatch",
+      "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
+    },
+    {
+      "name": "whitespace",
+      "method": "Ignore",
+      "pattern": "\\s+"
+    },
+    {
+      "name": "newline",
+      "method": "Ignore",
+      "pattern": "[\\n\\r]+"
+    },
+    {
+      "name": "equals",
+      "method": "Match",
+      "pattern": "="
+    }
+  ],
+  "parser_rules": []
+}

@@ -17,33 +17,24 @@ pub enum MatchResult {
     NotMatched
 }
 
-pub enum TokenizeResult {
+pub enum LexerResult {
     Success(Vec<Token>),
     Failure(String)
 }
 
 pub struct Lexer {
     grammar: Rc<Grammar>,
-    logger_path: String
 }
 
 impl Lexer {
     pub fn new(grammar: Rc<Grammar>) -> Lexer {
         Lexer {
-            grammar,
-            logger_path: String::from("lexer.log")
-        }
-    }
-
-    pub fn new_log_to_file(grammar: Rc<Grammar>, filename: &str) -> Lexer {
-        Lexer {
-            grammar,
-            logger_path: String::from(filename)
+            grammar
         }
     }
 
     fn log(&self, text: &str) {
-        let mut logger = Logger::new(File::create(&self.logger_path).unwrap());
+        let mut logger = Logger::new(File::create("logs\\lexer.log").unwrap());
         logger.log(text);
     }
 
@@ -52,13 +43,13 @@ impl Lexer {
         logger.logln(text);
     }
 
-    pub fn tokenize(&mut self, stream: &str) -> TokenizeResult {
-        let mut logger = Logger::new_file(&self.logger_path);
-
-        logger.logln(&format!("Beginning tokenizing stream:\n\"{}\"\n", stream));
+    pub fn tokenize(&self, stream: &str) -> LexerResult {
+        let sep = "----------------------------------------------------------------------------";
+        let sep2 = "Substream ..................................................................";
+        let mut logger = Logger::new_file("logs\\lexer.log");
+        logger.logln(&format!("Beginning tokenizing stream: \n{}\n{}\n{}\n\n", sep, stream, sep));
 
         let mut substream = stream[0..stream.len()].to_string();
-
         let mut tokens: Vec<Token> = vec![];
         let mut char_count: usize = 0;
 
@@ -70,10 +61,14 @@ impl Lexer {
             for rule in self.grammar.lexer_rules() {
 
                 let result = match rule {
-                    LexerRule::Match(text) => get_match(text, &substream, logger.borrow_mut()),
-                    LexerRule::RegexMatch(regex) => get_regex_match(regex, &substream, 0, logger.borrow_mut()),
-                    LexerRule::Capture(regex, capture) => get_regex_match(regex, &substream, *capture, logger.borrow_mut()),
-                    LexerRule::Ignore(regex) => get_regex_ignore(regex, &substream, logger.borrow_mut()),
+                    LexerRule::Match(name, text) =>
+                        get_match(name, text, &substream, logger.borrow_mut()),
+                    LexerRule::RegexMatch(name, regex) =>
+                        get_regex_match(name, regex, &substream, 0, logger.borrow_mut()),
+                    LexerRule::Capture(name, regex, capture) =>
+                        get_regex_match(name, regex, &substream, *capture, logger.borrow_mut()),
+                    LexerRule::Ignore(name, regex) =>
+                        get_regex_ignore(name, regex, &substream, logger.borrow_mut()),
                 };
 
                 match result {
@@ -90,6 +85,7 @@ impl Lexer {
                 }
             }
 
+
             if char_count == stream.len() {
                 logger.logln("Reached end of stream");
                 break 'stream_iter;
@@ -97,21 +93,22 @@ impl Lexer {
 
             if prev_char_count == char_count {
                 logger.logln("Error: No rules matched");
-                return TokenizeResult::Failure(String::from("No rules matched"));
+                return LexerResult::Failure(String::from("No rules matched"));
             }
 
             substream = stream[char_count..stream.len()].to_string();
-            logger.logln(&format!("Substream: \"{}\"\n", substream));
+            // logger.logln(&format!("Substream: \n{}\n{}\n{}\n", sep, substream, sep));
+            logger.logln(&format!("{}\n{}\n{}\n\n", sep2, substream, sep));
         }
-        TokenizeResult::Success(tokens)
+        LexerResult::Success(tokens)
     }
 }
 
-fn get_match(text: &str, stream: &String, logger: &mut Logger) -> MatchResult {
+fn get_match(name: &String, text: &str, stream: &String, logger: &mut Logger) -> MatchResult {
     if stream.starts_with(text) {
         let chars = text.len();
         let token = Token {
-            rule: LexerRule::Match(text.to_string()),
+            rule: LexerRule::Match(name.clone(), text.to_string()),
             text: text[0..chars].to_string()
         };
         logger.logln(format!("Matched: '{}'", token.text).as_str());
@@ -120,25 +117,25 @@ fn get_match(text: &str, stream: &String, logger: &mut Logger) -> MatchResult {
     MatchResult::NotMatched
 }
 
-fn get_regex_match(regex: &Regex, stream: &String, capture: usize, logger: &mut Logger) -> MatchResult {
+fn get_regex_match(name: &String, regex: &Regex, stream: &String, capture: usize, logger: &mut Logger) -> MatchResult {
     if let Some(caps) = regex.captures(&*stream) {
         let text = caps.get(capture).unwrap().as_str().to_string();
         let chars = text.len();
         let token = Token {
-            rule: LexerRule::RegexMatch(regex.clone()),
+            rule: LexerRule::RegexMatch(name.clone(), regex.clone()),
             text
         };
-        logger.logln(format!("Matched: '{}' to '{}'", token.text, regex.as_str()).as_str());
+        logger.logln(format!("Matched: '{}' to {} = '{}'", token.text, name, regex.as_str()).as_str());
         return MatchResult::Matched((token, chars));
     }
     MatchResult::NotMatched
 }
 
-fn get_regex_ignore(regex: &Regex, stream: &String, logger: &mut Logger) -> MatchResult {
+fn get_regex_ignore(name: &String, regex: &Regex, stream: &String, logger: &mut Logger) -> MatchResult {
     if let Some(caps) = regex.captures(&*stream) {
         let text = caps.get(0).unwrap().as_str();
         let chars = text.len();
-        logger.logln(format!("Ignored: {} chars", chars).as_str());
+        logger.logln(format!("Ignored: {} chars to {} = '{}'", chars, name, regex.as_str()).as_str());
         return MatchResult::Ignored(chars);
     }
     MatchResult::NotMatched
