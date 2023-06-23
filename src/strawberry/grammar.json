@@ -3,17 +3,27 @@
     {
       "name": "comment",
       "method": "Ignore",
-      "pattern": "(?://.*|/\\*.*?\\*/)"
+      "pattern": "(//.*|/\\*.*?\\*/)"
     },
     {
       "name": "string",
+      "method": "Capture(1)",
+      "pattern": "\"(.*)\""
+    },
+    {
+      "name": "digit",
       "method": "RegexMatch",
-      "pattern": "\".*?\""
+      "pattern": "\\d"
     },
     {
       "name": "int",
       "method": "RegexMatch",
-      "pattern": "\\d+"
+      "pattern": "$digit+"
+    },
+    {
+      "name": "letter",
+      "method": "RegexMatch",
+      "pattern": "[a-zA-Z]"
     },
     {
       "name": "double",
@@ -23,12 +33,17 @@
     {
       "name": "scientific notation",
       "method": "RegexMatch",
-      "pattern": "(?:$double|$int)[eE][+-]?$int"
+      "pattern": "($double|$int)[eE][+-]?$int"
     },
     {
       "name": "identifier",
       "method": "RegexMatch",
-      "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
+      "pattern": "$letter($letter|$digit|_)*"
+    },
+    {
+      "name": "default",
+        "method": "RegexMatch",
+        "pattern": "_$identifier?"
     },
     {
       "name": "whitespace",
@@ -38,12 +53,37 @@
     {
       "name": "newline",
       "method": "Ignore",
-      "pattern": "[\\n\\r]+"
+      "pattern": "[\\n|\\r]+"
     },
     {
       "name": "equals",
       "method": "Match",
       "pattern": "="
+    },
+    {
+      "name": "semicolon",
+      "method": "Match",
+      "pattern": ";"
+    },
+    {
+      "name": "comma",
+      "method": "Match",
+      "pattern": ","
+    },
+    {
+      "name": "regex",
+      "method": "Capture(1)",
+      "pattern": "r($string)"
+    },
+    {
+      "name": "backslash",
+      "method": "Match",
+      "pattern": "\\\\"
+    },
+    {
+      "name": "forwardslash",
+      "method": "Match",
+      "pattern": "/"
     }
   ],
   "parser_rules": []

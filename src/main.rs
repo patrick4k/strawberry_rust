@@ -1,3 +1,5 @@
+extern crate core;
+
 use std::env;
 use regex::Regex;
 use strawberry::StrawberryInterpreter::StrawberryInterpreter;
@@ -19,9 +21,8 @@ fn main() {
 
     // Process args
     let args: Vec<_> = env::args().collect();
-    for arg in &args {
-        // TODO: interpreter.process_arg(arg);
-    }
+    interpreter.process_args(args);
 
+    // Execute from file
     interpreter.execute_from_file(r"C:\Users\Patrick\Documents\Code\Strawberry\strawberry_rust\test\test_stream.sb");
 }

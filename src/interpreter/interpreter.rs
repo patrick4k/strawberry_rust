@@ -7,7 +7,9 @@ pub trait Interpreter<T> {
 
     fn get_lexer(&self) -> &Lexer;
     fn get_parser(&self) -> &Parser;
-    fn get_visit_map(&self) -> FxHashMap<String, fn(RuleCtx)->T>;
+    fn get_visit_map(&self) -> FxHashMap<String, fn(&RuleCtx)->T>;
+
+    fn process_args(&self, args: Vec<String>) {    }
 
     fn aggregate(&self, previous: Option<T>, next: Option<T>) -> Option<T> {
         next
@@ -35,7 +37,7 @@ pub trait Interpreter<T> {
                 let parser_result = self.parse(rules);
                 match parser_result {
                     ParseResult::Success(ctx_list) => {
-                        self.visit_ctx_list(ctx_list);
+                        self.visit_ctx_list(&ctx_list);
                     }
                     ParseResult::Failure(msg) => {
                         println!("ERROR: Parser failed to parse stream: {}", msg);
@@ -48,14 +50,14 @@ pub trait Interpreter<T> {
         }
     }
 
-    fn visit_ctx_list(&self, ctx_list: Vec<RuleCtx>) {
+    fn visit_ctx_list(&self, ctx_list: &Vec<RuleCtx>) {
         for ctx in ctx_list {
             self.visit_ctx(ctx);
         }
     }
 
-    fn visit_ctx(&self, ctx: RuleCtx) -> Option<T> {
-        match &ctx.rule {
+    fn visit_ctx(&self, ctx: &RuleCtx) -> Option<T> {
+        match &ctx.rule() {
             Rule::Visitable(name) => {
                 let visit_map = self.get_visit_map();
                 return match visit_map.get(&*name) {
@@ -76,9 +78,9 @@ pub trait Interpreter<T> {
         None
     }
 
-    fn visit_children(&self, ctx: RuleCtx) -> Option<T> {
+    fn visit_children(&self, ctx: &RuleCtx) -> Option<T> {
         let mut ret_val: Option<T> = None;
-        for child in ctx.children {
+        for child in ctx.children() {
             let tmp_val = self.visit_ctx(child);
             ret_val = self.aggregate(ret_val, tmp_val);
         }

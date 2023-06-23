@@ -35,7 +35,7 @@ impl Interpreter<ReturnType> for StrawberryInterpreter {
         &self.parser
     }
 
-    fn get_visit_map(&self) -> FxHashMap<String, fn(RuleCtx) -> ReturnType> {
+    fn get_visit_map(&self) -> FxHashMap<String, fn(&RuleCtx) -> ReturnType> {
         todo!()
     }
 }

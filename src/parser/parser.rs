@@ -21,9 +21,21 @@ pub enum ParseResult {
 }
 
 pub struct RuleCtx {
-    pub(crate) rule: Rule,
+    rule: Rule,
     text: String,
-    pub(crate) children: Vec<RuleCtx>,
+    children: Vec<RuleCtx>,
+}
+
+impl RuleCtx {
+    pub fn rule(&self) -> &Rule {
+        &self.rule
+    }
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+    pub fn children(&self) -> &Vec<RuleCtx> {
+        &self.children
+    }
 }
 
 pub struct Parser {

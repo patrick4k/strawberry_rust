@@ -42,7 +42,7 @@ impl Data {
                 "Ignore" => LexerRule::Ignore(name, resolve_lexer_regex(pattern, &lexer_rules)),
                 _ => {
                     let captures = Regex::new(r"Capture\((\d+)\)").unwrap().captures(&data.method);
-                    match captures {
+                    let rule = match captures {
                         Some(captures) => {
                             cap_group = captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
                             let re = resolve_lexer_regex(data.pattern.clone(), &lexer_rules);
@@ -51,7 +51,8 @@ impl Data {
                         None => {
                             panic!("Invalid method: {}", method);
                         }
-                    }
+                    };
+                    rule
                 }
             };
             lexer_rules.push(rule);
@@ -70,12 +71,20 @@ fn resolve_lexer_regex(pattern: String, rules: &Vec<LexerRule>) -> Regex {
         let name = caps.get(2).unwrap().as_str();
         let rule = rules.iter().find(|r| {
             return match r {
-                LexerRule::RegexMatch(re_name, re) => re_name == name,
+                LexerRule::RegexMatch(re_name, _) => re_name == name,
+                LexerRule::Capture(re_name, _, _) => re_name == name,
+                LexerRule::Ignore(re_name, _) => re_name == name,
                 _ => false
             };
         }).unwrap();
-        let re = rule.regex().as_str();
-        "(?:".to_owned() + &re[1..re.len()] + ")"
+        let re = rule.regex_opt();
+        match re {
+            Some(re) => {
+                let str = re.as_str();
+                "(?:".to_owned() + &str[1..str.len()] + ")"
+            },
+            None => panic!("Invalid reference: {} in lexer pattern", name)
+        }
     });
     println!("{} -> {}", pattern, output);
     Regex::new(&*("^".to_owned() + &output.to_string())).unwrap()

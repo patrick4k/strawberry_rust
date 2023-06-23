@@ -1,3 +1,3 @@
-abc_123 = /* block comment */ 12.5e-10 // trailing comment
 
-abcd_1234 = "string literal"
+let a = "my new string";
+let b = a;

@@ -45,17 +45,17 @@ impl Lexer {
 
     pub fn tokenize(&self, stream: &str) -> LexerResult {
         let sep = "----------------------------------------------------------------------------";
-        let sep2 = "Substream ..................................................................";
+        let sep2 = "Substream ------------------------------------------------------------------";
         let mut logger = Logger::new_file("logs\\lexer.log");
         logger.logln(&format!("Beginning tokenizing stream: \n{}\n{}\n{}\n\n", sep, stream, sep));
 
-        let mut substream = stream[0..stream.len()].to_string();
+        let mut substream = stream.to_string();
         let mut tokens: Vec<Token> = vec![];
-        let mut char_count: usize = 0;
+        let mut char_count: usize;
 
         'stream_iter:
         loop {
-            let prev_char_count = char_count;
+            char_count = 0;
 
             'rule_iter:
             for rule in self.grammar.lexer_rules() {
@@ -86,20 +86,25 @@ impl Lexer {
             }
 
 
-            if char_count == stream.len() {
+            if char_count == substream.len() {
                 logger.logln("Reached end of stream");
                 break 'stream_iter;
             }
 
-            if prev_char_count == char_count {
+            if char_count == 0 {
                 logger.logln("Error: No rules matched");
                 return LexerResult::Failure(String::from("No rules matched"));
             }
 
-            substream = stream[char_count..stream.len()].to_string();
-            // logger.logln(&format!("Substream: \n{}\n{}\n{}\n", sep, substream, sep));
+            substream = substream[char_count..substream.len()].to_string();
             logger.logln(&format!("{}\n{}\n{}\n\n", sep2, substream, sep));
         }
+
+        logger.logln("\nLexer finished successfully,\nPrinting tokens:\n");
+        for token in &tokens {
+            logger.logln(&format!(">> {}", token.text));
+        }
+
         LexerResult::Success(tokens)
     }
 }
@@ -120,7 +125,7 @@ fn get_match(name: &String, text: &str, stream: &String, logger: &mut Logger) ->
 fn get_regex_match(name: &String, regex: &Regex, stream: &String, capture: usize, logger: &mut Logger) -> MatchResult {
     if let Some(caps) = regex.captures(&*stream) {
         let text = caps.get(capture).unwrap().as_str().to_string();
-        let chars = text.len();
+        let chars = caps.get(0).unwrap().as_str().len();
         let token = Token {
             rule: LexerRule::RegexMatch(name.clone(), regex.clone()),
             text

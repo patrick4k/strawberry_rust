@@ -26,12 +26,9 @@ impl Grammar {
         }
     }
 
-
-
     pub fn lexer_rules(&self) -> &Vec<LexerRule> {
         &self.lexer_rules
     }
-
     pub fn parser_rules(&self) -> &Vec<ParserRule> {
         &self.parser_rules
     }
@@ -64,17 +61,25 @@ impl LexerRule {
             LexerRule::Capture(name, _, _) => name
         }
     }
+
     pub fn regex(&self) -> &Regex {
+        match self.regex_opt() {
+            Some(re) => re,
+            None => panic!("LexerRule::regex() called on non-regex rule")
+        }
+    }
+
+    pub fn regex_opt(&self) -> Option<&Regex> {
         match self {
-            LexerRule::RegexMatch(_, regex) => regex,
-            LexerRule::Ignore(_, regex) => regex,
-            LexerRule::Capture(_, regex, _) => regex,
-            _ => panic!("Not a RegexMatch")
+            LexerRule::RegexMatch(_, regex) => Some(regex),
+            LexerRule::Ignore(_, regex) => Some(regex),
+            LexerRule::Capture(_, regex, _) => Some(regex),
+            _ => None
         }
     }
 }
 
 pub enum ParserRule {
     Match(Vec<Rule>),
-    MatchIf(Vec<Rule>, fn(RuleCtx) -> bool),
+    MatchIf(Vec<Rule>, fn(&RuleCtx) -> bool),
 }
