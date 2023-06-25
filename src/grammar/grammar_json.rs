@@ -37,16 +37,16 @@ impl Data {
             let pattern = data.pattern.clone();
             let method = data.method.clone();
             let rule = match &*method {
-                "Match" => LexerRule::Match(name, pattern),
-                "RegexMatch" => LexerRule::RegexMatch(name, resolve_lexer_regex(pattern, &lexer_rules)),
-                "Ignore" => LexerRule::Ignore(name, resolve_lexer_regex(pattern, &lexer_rules)),
+                "Match" => LexerRule::Match { name, pattern },
+                "RegexMatch" => LexerRule::RegexMatch { name, pattern: resolve_lexer_regex(pattern, &lexer_rules) },
+                "Ignore" => LexerRule::Ignore { name, pattern: resolve_lexer_regex(pattern, &lexer_rules) },
                 _ => {
                     let captures = Regex::new(r"Capture\((\d+)\)").unwrap().captures(&data.method);
                     let rule = match captures {
                         Some(captures) => {
                             cap_group = captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
                             let re = resolve_lexer_regex(data.pattern.clone(), &lexer_rules);
-                            LexerRule::Capture(data.name.clone(), re, cap_group)
+                            LexerRule::Capture { name: data.name.clone(), pattern: re, capture: cap_group }
                         }
                         None => {
                             panic!("Invalid method: {}", method);
@@ -71,9 +71,9 @@ fn resolve_lexer_regex(pattern: String, rules: &Vec<LexerRule>) -> Regex {
         let name = caps.get(2).unwrap().as_str();
         let rule = rules.iter().find(|r| {
             return match r {
-                LexerRule::RegexMatch(re_name, _) => re_name == name,
-                LexerRule::Capture(re_name, _, _) => re_name == name,
-                LexerRule::Ignore(re_name, _) => re_name == name,
+                LexerRule::RegexMatch{name: re_name, ..} => re_name == name,
+                LexerRule::Capture{name: re_name, ..} => re_name == name,
+                LexerRule::Ignore{name: re_name, ..} => re_name == name,
                 _ => false
             };
         }).unwrap();
@@ -86,7 +86,6 @@ fn resolve_lexer_regex(pattern: String, rules: &Vec<LexerRule>) -> Regex {
             None => panic!("Invalid reference: {} in lexer pattern", name)
         }
     });
-    println!("{} -> {}", pattern, output);
     Regex::new(&*("^".to_owned() + &output.to_string())).unwrap()
 }
 

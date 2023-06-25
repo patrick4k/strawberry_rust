@@ -4,10 +4,11 @@ use crate::grammar::grammar::Grammar;
 use crate::lexer::lexer::Token;
 use crate::logger::logger::Logger;
 
+
+
 pub enum Rule {
-    Visitable(String),
+    Visitable{name: String},
     NonVisitable,
-    Ignore
 }
 
 pub enum MatchResult {
@@ -24,6 +25,7 @@ pub struct RuleCtx {
     rule: Rule,
     text: String,
     children: Vec<RuleCtx>,
+
 }
 
 impl RuleCtx {
@@ -50,7 +52,10 @@ impl Parser {
         }
     }
 
-    pub fn parse(&self, stream: Vec<Token>) -> ParseResult {
+    pub fn parse(&self, token_stream: Vec<Token>) -> ParseResult {
+        if token_stream.len() == 0 {
+            return ParseResult::Failure(String::from("Empty stream"));
+        }
         ParseResult::Failure(String::from("Parser not implemented"))
     }
 }

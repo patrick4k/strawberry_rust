@@ -58,7 +58,7 @@ pub trait Interpreter<T> {
 
     fn visit_ctx(&self, ctx: &RuleCtx) -> Option<T> {
         match &ctx.rule() {
-            Rule::Visitable(name) => {
+            Rule::Visitable{name} => {
                 let visit_map = self.get_visit_map();
                 return match visit_map.get(&*name) {
                     Some(visit_fn) => {
@@ -73,7 +73,6 @@ pub trait Interpreter<T> {
             Rule::NonVisitable => {
                 return self.visit_children(ctx);
             }
-            Rule::Ignore => { /* Do Nothing */ }
         }
         None
     }

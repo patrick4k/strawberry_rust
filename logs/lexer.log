@@ -7,7 +7,7 @@ let b = a;
 ----------------------------------------------------------------------------
 
 
-Ignored: 2 chars to whitespace = '^\s+'
+Ignored: 2 chars to newline = '^[\n|\r]+'
 Substream ------------------------------------------------------------------
 let a = "my new string";
 let b = a;
@@ -79,7 +79,7 @@ let b = a;
 ----------------------------------------------------------------------------
 
 
-Ignored: 2 chars to whitespace = '^\s+'
+Ignored: 2 chars to newline = '^[\n|\r]+'
 Substream ------------------------------------------------------------------
 let b = a;
 
@@ -142,7 +142,7 @@ Substream ------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
 
-Ignored: 2 chars to whitespace = '^\s+'
+Ignored: 2 chars to newline = '^[\n|\r]+'
 Reached end of stream
 
 Lexer finished successfully,

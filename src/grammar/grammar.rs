@@ -46,19 +46,19 @@ pub enum Rule {
 }
 
 pub enum LexerRule {
-    Match(String, String),
-    RegexMatch(String, Regex),
-    Ignore(String, Regex),
-    Capture(String, Regex, usize),
+    Match { name: String, pattern: String },
+    RegexMatch { name: String, pattern: Regex },
+    Ignore { name: String, pattern: Regex },
+    Capture { name: String, pattern: Regex, capture: usize },
 }
 
 impl LexerRule {
     pub fn name(&self) -> &str {
         match self {
-            LexerRule::Match(name, _) => name,
-            LexerRule::RegexMatch(name, _) => name,
-            LexerRule::Ignore(name, _) => name,
-            LexerRule::Capture(name, _, _) => name
+            LexerRule::Match { name, .. } => name,
+            LexerRule::RegexMatch { name, .. } => name,
+            LexerRule::Ignore { name, .. } => name,
+            LexerRule::Capture { name, ..} => name
         }
     }
 
@@ -71,9 +71,9 @@ impl LexerRule {
 
     pub fn regex_opt(&self) -> Option<&Regex> {
         match self {
-            LexerRule::RegexMatch(_, regex) => Some(regex),
-            LexerRule::Ignore(_, regex) => Some(regex),
-            LexerRule::Capture(_, regex, _) => Some(regex),
+            LexerRule::RegexMatch { pattern, .. } => Some(pattern),
+            LexerRule::Ignore { pattern, .. } => Some(pattern),
+            LexerRule::Capture { pattern, .. } => Some(pattern),
             _ => None
         }
     }

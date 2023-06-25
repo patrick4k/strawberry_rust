@@ -41,19 +41,5 @@ impl Interpreter<ReturnType> for StrawberryInterpreter {
 }
 
 fn strawberry_grammar() -> Grammar {
-    // let mut grammar = Grammar::new();
-    // let lexer_rules: Vec<&str> = vec![
-    //     "(?:let)+", // Lets
-    //     r"[a-zA-Z](\w|_)*", // Identifier
-    //     "=", // Equals
-    //     ";", // Semicolon
-    // ];
-    //
-    // for rule in lexer_rules {
-    //     let re = Regex::new(&*("^".to_owned() + rule)).unwrap();
-    //     let lr = LexerRule::RegexMatch("foobar".to_string(), re);
-    //     grammar.add_rule(Rule::Lexer(lr));
-    // }
-    // grammar
     Grammar::new_from_json(r"C:\Users\Patrick\Documents\Code\Strawberry\strawberry_rust\src\strawberry\grammar.json")
 }

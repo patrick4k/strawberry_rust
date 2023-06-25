@@ -12,8 +12,8 @@ pub struct Token {
 }
 
 pub enum MatchResult {
-    Matched((Token, usize)),
-    Ignored(usize),
+    Matched{token: Token, chars: usize},
+    Ignored{chars: usize},
     NotMatched
 }
 
@@ -61,23 +61,23 @@ impl Lexer {
             for rule in self.grammar.lexer_rules() {
 
                 let result = match rule {
-                    LexerRule::Match(name, text) =>
-                        get_match(name, text, &substream, logger.borrow_mut()),
-                    LexerRule::RegexMatch(name, regex) =>
-                        get_regex_match(name, regex, &substream, 0, logger.borrow_mut()),
-                    LexerRule::Capture(name, regex, capture) =>
-                        get_regex_match(name, regex, &substream, *capture, logger.borrow_mut()),
-                    LexerRule::Ignore(name, regex) =>
-                        get_regex_ignore(name, regex, &substream, logger.borrow_mut()),
+                    LexerRule::Match { name, pattern } =>
+                        get_match(name, pattern, &substream, logger.borrow_mut()),
+                    LexerRule::RegexMatch { name, pattern } =>
+                        get_regex_match(name, pattern, &substream, 0, logger.borrow_mut()),
+                    LexerRule::Capture { name, pattern, capture } =>
+                        get_regex_match(name, pattern, &substream, *capture, logger.borrow_mut()),
+                    LexerRule::Ignore { name, pattern } =>
+                        get_regex_ignore(name, pattern, &substream, logger.borrow_mut()),
                 };
 
                 match result {
-                    MatchResult::Matched((token, chars)) => {
+                    MatchResult::Matched{token, chars} => {
                         tokens.push(token);
                         char_count += chars;
                         break 'rule_iter;
                     }
-                    MatchResult::Ignored(chars) => {
+                    MatchResult::Ignored{chars} => {
                         char_count += chars;
                         break 'rule_iter
                     }
@@ -113,11 +113,11 @@ fn get_match(name: &String, text: &str, stream: &String, logger: &mut Logger) ->
     if stream.starts_with(text) {
         let chars = text.len();
         let token = Token {
-            rule: LexerRule::Match(name.clone(), text.to_string()),
+            rule: LexerRule::Match { name: name.clone(), pattern: text.to_string() },
             text: text[0..chars].to_string()
         };
         logger.logln(format!("Matched: '{}'", token.text).as_str());
-        return MatchResult::Matched((token, chars));
+        return MatchResult::Matched{token, chars};
     }
     MatchResult::NotMatched
 }
@@ -127,11 +127,11 @@ fn get_regex_match(name: &String, regex: &Regex, stream: &String, capture: usize
         let text = caps.get(capture).unwrap().as_str().to_string();
         let chars = caps.get(0).unwrap().as_str().len();
         let token = Token {
-            rule: LexerRule::RegexMatch(name.clone(), regex.clone()),
+            rule: LexerRule::RegexMatch { name: name.clone(), pattern: regex.clone() },
             text
         };
         logger.logln(format!("Matched: '{}' to {} = '{}'", token.text, name, regex.as_str()).as_str());
-        return MatchResult::Matched((token, chars));
+        return MatchResult::Matched{token, chars};
     }
     MatchResult::NotMatched
 }
@@ -141,7 +141,7 @@ fn get_regex_ignore(name: &String, regex: &Regex, stream: &String, logger: &mut 
         let text = caps.get(0).unwrap().as_str();
         let chars = text.len();
         logger.logln(format!("Ignored: {} chars to {} = '{}'", chars, name, regex.as_str()).as_str());
-        return MatchResult::Ignored(chars);
+        return MatchResult::Ignored{chars};
     }
     MatchResult::NotMatched
 }
