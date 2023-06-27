@@ -13,6 +13,7 @@ mod parser;
 mod grammar;
 mod interpreter;
 mod strawberry;
+mod util;
 
 fn main() {
 

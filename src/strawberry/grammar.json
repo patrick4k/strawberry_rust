@@ -73,7 +73,7 @@
     {
       "name": "regex",
       "method": "Capture(1)",
-      "pattern": "r($string)"
+      "pattern": "r$string"
     },
     {
       "name": "backslash",
@@ -86,5 +86,22 @@
       "pattern": "/"
     }
   ],
-  "parser_rules": []
+  "parser_rules": [
+    {
+      "name": "expression",
+      "pattern": "double"
+    },
+    {
+      "name": "assign",
+      "pattern": "identifier . equals . expression"
+    },
+    {
+      "name": "statement",
+      "pattern": "assign . semicolon"
+    },
+    {
+    "name": "program",
+    "pattern": "statement*"
+    }
+  ]
 }

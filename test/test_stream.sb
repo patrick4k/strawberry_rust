@@ -1,3 +1,2 @@
 
-let a = "my new string";
-let b = a;
+let a = r"my new string";

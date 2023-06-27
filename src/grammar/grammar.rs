@@ -1,6 +1,7 @@
 use regex::Regex;
 use crate::grammar::grammar_json::read_grammar;
 use crate::parser::parser::RuleCtx;
+use crate::util::util::OneOrMore;
 
 pub struct Grammar {
     lexer_rules: Vec<LexerRule>,
@@ -40,11 +41,13 @@ impl Grammar {
     }
 }
 
+#[derive(Clone)]
 pub enum Rule {
     Lexer(LexerRule),
     Parser(ParserRule)
 }
 
+#[derive(Clone)]
 pub enum LexerRule {
     Match { name: String, pattern: String },
     RegexMatch { name: String, pattern: Regex },
@@ -79,7 +82,15 @@ impl LexerRule {
     }
 }
 
+#[derive(Clone)]
 pub enum ParserRule {
-    Match(Vec<Rule>),
-    MatchIf(Vec<Rule>, fn(&RuleCtx) -> bool),
+    Pratt { name: String, sequence: Vec<Rule>, left_binding_power: i32 },
+    Recursive { name: String, sequence: OneOrMore<Vec<RuleWrapper>> },
+    SelfRef
+}
+
+#[derive(Clone)]
+pub enum RuleWrapper {
+    Singleton(Rule),
+    Multiton{rule: Rule, min: usize, max: Option<usize>}
 }

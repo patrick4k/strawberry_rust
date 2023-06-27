@@ -1,7 +1,7 @@
 use std::borrow::BorrowMut;
 use fxhash::FxHashMap;
 use crate::lexer::lexer::{Lexer, Token, LexerResult};
-use crate::parser::parser::{Parser, ParseResult, Rule, RuleCtx};
+use crate::parser::parser::{Parser, ParseResult, RuleCtx};
 
 pub trait Interpreter<T> {
 
@@ -57,24 +57,15 @@ pub trait Interpreter<T> {
     }
 
     fn visit_ctx(&self, ctx: &RuleCtx) -> Option<T> {
-        match &ctx.rule() {
-            Rule::Visitable{name} => {
-                let visit_map = self.get_visit_map();
-                return match visit_map.get(&*name) {
-                    Some(visit_fn) => {
-                        Some(visit_fn(ctx))
-                    }
-                    None => {
-                        println!("ERROR: No visit function found for rule: {}", name);
-                        None
-                    }
-                }
+        let visit_map = self.get_visit_map();
+        return match visit_map.get(ctx.rule()) {
+            Some(visit_fn) => {
+                Some(visit_fn(ctx))
             }
-            Rule::NonVisitable => {
-                return self.visit_children(ctx);
+            None => {
+                panic!("ERROR: No visit function found for rule: {}", ctx.rule());
             }
         }
-        None
     }
 
     fn visit_children(&self, ctx: &RuleCtx) -> Option<T> {
