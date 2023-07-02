@@ -1,2 +1,7 @@
 
 let a = r"my new string";
+
+
+foreach 9 << 10 {
+    println!("Hello, world!");
+}

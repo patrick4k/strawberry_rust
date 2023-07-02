@@ -1,0 +1,16 @@
+
+pub enum Token {
+
+$<TOKENS>
+}
+
+impl Token {
+
+    pub fn from(name: &str, value: String) -> Token {
+        match name {
+$<TOKEN_FROM_STR>
+            _ => panic!("Invalid token: {}", name)
+        }
+    }
+
+}

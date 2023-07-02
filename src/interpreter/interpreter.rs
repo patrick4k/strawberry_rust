@@ -1,28 +1,27 @@
-use std::borrow::BorrowMut;
-use fxhash::FxHashMap;
-use crate::lexer::lexer::{Lexer, Token, LexerResult};
-use crate::parser::parser::{Parser, ParseResult, RuleCtx};
+use crate::gen::tokens::Token;
+use crate::grammar::grammar::Grammar;
+use crate::lexer::lexer::{Lexer, LexerResult};
+use crate::parser::parser::{Parser, ParseResult};
 
-pub trait Interpreter<T> {
+pub enum InterpreterResult {
+    Success,
+    Failure(String)
+}
 
-    fn get_lexer(&self) -> &Lexer;
-    fn get_parser(&self) -> &Parser;
-    fn get_visit_map(&self) -> FxHashMap<String, fn(&RuleCtx)->T>;
+pub trait Interpreter {
 
-    fn process_args(&self, args: Vec<String>) {    }
-
-    fn aggregate(&self, previous: Option<T>, next: Option<T>) -> Option<T> {
-        next
+    fn get_grammar(&self) -> Grammar;
+    fn process_args(&mut self, args: Vec<String>) {    }
+    fn parse(&mut self, tokens: Vec<Token>) -> ParseResult {
+        ParseResult::Failure("Parser not implemented".to_string())
+    }
+    fn interpret(&mut self) -> InterpreterResult {
+        InterpreterResult::Failure("Interpreter not implemented".to_string())
     }
 
     fn lex(&self, stream: &str) -> LexerResult {
-        let lexer = self.get_lexer();
+        let lexer = Lexer{grammar: &self.get_grammar() };
         lexer.tokenize(stream)
-    }
-
-    fn parse(&self, tokens: Vec<Token>) -> ParseResult {
-        let parser = self.get_parser();
-        parser.parse(tokens)
     }
 
     fn execute_from_file(&mut self, path: &str) {
@@ -34,10 +33,11 @@ pub trait Interpreter<T> {
         let lexer_result = self.lex(stream);
         match lexer_result {
             LexerResult::Success(rules) => {
+
                 let parser_result = self.parse(rules);
                 match parser_result {
-                    ParseResult::Success(ctx_list) => {
-                        self.visit_ctx_list(&ctx_list);
+                    ParseResult::Success => {
+                        println!("SUCCESS: Parser successfully parsed stream");
                     }
                     ParseResult::Failure(msg) => {
                         println!("ERROR: Parser failed to parse stream: {}", msg);
@@ -48,32 +48,5 @@ pub trait Interpreter<T> {
                 println!("ERROR: Lexer failed to tokenize stream: {}", msg);
             }
         }
-    }
-
-    fn visit_ctx_list(&self, ctx_list: &Vec<RuleCtx>) {
-        for ctx in ctx_list {
-            self.visit_ctx(ctx);
-        }
-    }
-
-    fn visit_ctx(&self, ctx: &RuleCtx) -> Option<T> {
-        let visit_map = self.get_visit_map();
-        return match visit_map.get(ctx.rule()) {
-            Some(visit_fn) => {
-                Some(visit_fn(ctx))
-            }
-            None => {
-                panic!("ERROR: No visit function found for rule: {}", ctx.rule());
-            }
-        }
-    }
-
-    fn visit_children(&self, ctx: &RuleCtx) -> Option<T> {
-        let mut ret_val: Option<T> = None;
-        for child in ctx.children() {
-            let tmp_val = self.visit_ctx(child);
-            ret_val = self.aggregate(ret_val, tmp_val);
-        }
-        ret_val
     }
 }

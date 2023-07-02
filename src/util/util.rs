@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone)]
 pub enum OneOrMore<T: Clone> {
     One(T),
     More(Vec<T>)
@@ -15,9 +15,32 @@ impl<T: Clone> OneOrMore<T> {
     }
     
     pub(crate) fn from(val: Vec<T>) -> OneOrMore<T> {
-        match val.len() { 
-            1 => OneOrMore::One(val[0].clone()),
+        let size = val.len().clone();
+        match size {
+            1 => OneOrMore::One(val.into_iter().next().unwrap()),
             _ => OneOrMore::More(val)
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum ZeroOrMore<T: Clone> {
+    Zero,
+    More(Vec<T>)
+}
+
+impl<T: Clone> ZeroOrMore<T> {
+    pub(crate) fn to_vec(self) -> Vec<T> {
+        match self {
+            ZeroOrMore::Zero => vec![],
+            ZeroOrMore::More(more) => more
+        }
+    }
+
+    pub(crate) fn from(val: Vec<T>) -> ZeroOrMore<T> {
+        match val.len() {
+            0 => ZeroOrMore::Zero,
+            _ => ZeroOrMore::More(val)
         }
     }
 }

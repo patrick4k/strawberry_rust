@@ -5,11 +5,7 @@ use std::rc::Rc;
 use regex::Regex;
 use crate::grammar::grammar::{Grammar, LexerRule};
 use crate::logger::logger::Logger;
-
-pub struct Token {
-    rule: LexerRule,
-    text: String
-}
+use crate::gen::tokens::Token;
 
 pub enum MatchResult {
     Matched{token: Token, chars: usize},
@@ -22,16 +18,11 @@ pub enum LexerResult {
     Failure(String)
 }
 
-pub struct Lexer {
-    grammar: Rc<Grammar>,
+pub struct Lexer<'a> {
+    pub(crate) grammar: &'a Grammar,
 }
 
-impl Lexer {
-    pub fn new(grammar: Rc<Grammar>) -> Lexer {
-        Lexer {
-            grammar
-        }
-    }
+impl Lexer<'_> {
 
     fn log(&self, text: &str) {
         let mut logger = Logger::new(File::create("logs\\lexer.log").unwrap());
@@ -100,11 +91,7 @@ impl Lexer {
             logger.logln(&format!("{}\n{}\n{}\n\n", sep2, substream, sep));
         }
 
-        logger.logln("\nLexer finished successfully,\nPrinting tokens:\n");
-        for token in &tokens {
-            logger.logln(&format!(">> {}", token.text));
-        }
-
+        logger.logln("\nLexer finished successfully,\n");
         LexerResult::Success(tokens)
     }
 }
@@ -112,11 +99,15 @@ impl Lexer {
 fn get_match(name: &String, text: &str, stream: &String, logger: &mut Logger) -> MatchResult {
     if stream.starts_with(text) {
         let chars = text.len();
-        let token = Token {
-            rule: LexerRule::Match { name: name.clone(), pattern: text.to_string() },
-            text: text[0..chars].to_string()
-        };
-        logger.logln(format!("Matched: '{}'", token.text).as_str());
+
+        // let token = Token {
+        //     rule: LexerRule::Match { name: name.clone(), pattern: text.to_string() },
+        //     text: text[0..chars].to_string()
+        // };
+
+        let text = text[0..chars].to_string();
+        let token = Token::from(&*name, text.clone());
+        logger.logln(format!("Matched: '{}' to {}", text, name).as_str());
         return MatchResult::Matched{token, chars};
     }
     MatchResult::NotMatched
@@ -126,11 +117,12 @@ fn get_regex_match(name: &String, regex: &Regex, stream: &String, capture: usize
     if let Some(caps) = regex.captures(&*stream) {
         let text = caps.get(capture).unwrap().as_str().to_string();
         let chars = caps.get(0).unwrap().as_str().len();
-        let token = Token {
-            rule: LexerRule::RegexMatch { name: name.clone(), pattern: regex.clone() },
-            text
-        };
-        logger.logln(format!("Matched: '{}' to {} = '{}'", token.text, name, regex.as_str()).as_str());
+        // let token = Token {
+        //     rule: LexerRule::RegexMatch { name: name.clone(), pattern: regex.clone() },
+        //     text
+        // };
+        let token = Token::from(&*name, text.clone());
+        logger.logln(format!("Matched: '{}' to {} = '{}'", text, name, regex.as_str()).as_str());
         return MatchResult::Matched{token, chars};
     }
     MatchResult::NotMatched

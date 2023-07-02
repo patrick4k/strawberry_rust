@@ -1,1 +1,2 @@
-pub mod StrawberryInterpreter;
+pub mod strawberry_interpreter;
+mod parser;

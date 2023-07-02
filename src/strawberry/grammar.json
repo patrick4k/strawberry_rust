@@ -1,107 +1,172 @@
-{
-  "lexer_rules": [
-    {
-      "name": "comment",
-      "method": "Ignore",
-      "pattern": "(//.*|/\\*.*?\\*/)"
-    },
-    {
-      "name": "string",
-      "method": "Capture(1)",
-      "pattern": "\"(.*)\""
-    },
-    {
-      "name": "digit",
-      "method": "RegexMatch",
-      "pattern": "\\d"
-    },
-    {
-      "name": "int",
-      "method": "RegexMatch",
-      "pattern": "$digit+"
-    },
-    {
-      "name": "letter",
-      "method": "RegexMatch",
-      "pattern": "[a-zA-Z]"
-    },
-    {
-      "name": "double",
-      "method": "RegexMatch",
-      "pattern": "-?$int?\\.$int"
-    },
-    {
-      "name": "scientific notation",
-      "method": "RegexMatch",
-      "pattern": "($double|$int)[eE][+-]?$int"
-    },
-    {
-      "name": "identifier",
-      "method": "RegexMatch",
-      "pattern": "$letter($letter|$digit|_)*"
-    },
-    {
-      "name": "default",
-        "method": "RegexMatch",
-        "pattern": "_$identifier?"
-    },
-    {
-      "name": "whitespace",
-      "method": "Ignore",
-      "pattern": "\\s+"
-    },
-    {
-      "name": "newline",
-      "method": "Ignore",
-      "pattern": "[\\n|\\r]+"
-    },
-    {
-      "name": "equals",
-      "method": "Match",
-      "pattern": "="
-    },
-    {
-      "name": "semicolon",
-      "method": "Match",
-      "pattern": ";"
-    },
-    {
-      "name": "comma",
-      "method": "Match",
-      "pattern": ","
-    },
-    {
-      "name": "regex",
-      "method": "Capture(1)",
-      "pattern": "r$string"
-    },
-    {
-      "name": "backslash",
-      "method": "Match",
-      "pattern": "\\\\"
-    },
-    {
-      "name": "forwardslash",
-      "method": "Match",
-      "pattern": "/"
-    }
-  ],
-  "parser_rules": [
-    {
-      "name": "expression",
-      "pattern": "double"
-    },
-    {
-      "name": "assign",
-      "pattern": "identifier . equals . expression"
-    },
-    {
-      "name": "statement",
-      "pattern": "assign . semicolon"
-    },
-    {
-    "name": "program",
-    "pattern": "statement*"
-    }
-  ]
-}
+[
+  {
+    "name": "Comment",
+    "method": "Ignore",
+    "pattern": "(//.*|/\\*.*?\\*/)"
+  },
+  {
+    "name": "String",
+    "method": "Capture(1)",
+    "pattern": "\"(.*)\""
+  },
+  {
+    "name": "Digit",
+    "method": "RegexMatch",
+    "pattern": "\\d"
+  },
+  {
+    "name": "Int",
+    "method": "RegexMatch",
+    "pattern": "$Digit+"
+  },
+  {
+    "name": "Letter",
+    "method": "RegexMatch",
+    "pattern": "[a-zA-Z]"
+  },
+  {
+    "name": "Double",
+    "method": "RegexMatch",
+    "pattern": "-?$Int?\\.$Int"
+  },
+  {
+    "name": "ScientificNotation",
+    "method": "RegexMatch",
+    "pattern": "($Double|$Int)[eE][+-]?$Int"
+  },
+  {
+    "name": "Identifier",
+    "method": "RegexMatch",
+    "pattern": "$Letter($Letter|$Digit|_)*"
+  },
+  {
+    "name": "Whitespace",
+    "method": "Ignore",
+    "pattern": "\\s+"
+  },
+  {
+    "name": "Newline",
+    "method": "Ignore",
+    "pattern": "[\\n\\r]+"
+  },
+  {
+    "name": "Assignment",
+    "method": "Match",
+    "pattern": "="
+  },
+  {
+    "name": "Semicolon",
+    "method": "Match",
+    "pattern": ";"
+  },
+  {
+    "name": "Comma",
+    "method": "Match",
+    "pattern": ","
+  },
+  {
+    "name": "ParenthesisOpen",
+    "method": "Match",
+    "pattern": "("
+  },
+  {
+    "name": "ParenthesisClose",
+    "method": "Match",
+    "pattern": ")"
+  },
+  {
+    "name": "CurlyBracketOpen",
+    "method": "Match",
+    "pattern": "{"
+  },
+  {
+    "name": "CurlyBracketClose",
+    "method": "Match",
+    "pattern": "}"
+  },
+  {
+    "name": "SquareBracketOpen",
+    "method": "Match",
+    "pattern": "["
+  },
+  {
+    "name": "SquareBracketClose",
+    "method": "Match",
+    "pattern": "]"
+  },
+  {
+    "name": "Period",
+    "method": "Match",
+    "pattern": "."
+  },
+  {
+    "name": "Colon",
+    "method": "Match",
+    "pattern": ":"
+  },
+  {
+    "name": "Minus",
+    "method": "Match",
+    "pattern": "-"
+  },
+  {
+    "name": "Plus",
+    "method": "Match",
+    "pattern": "+"
+  },
+  {
+    "name": "Multiply",
+    "method": "Match",
+    "pattern": "*"
+  },
+  {
+    "name": "Divide",
+    "method": "Match",
+    "pattern": "/"
+  },
+  {
+    "name": "Modulo",
+    "method": "Match",
+    "pattern": "%"
+  },
+  {
+    "name": "Exponent",
+    "method": "Match",
+    "pattern": "^"
+  },
+  {
+    "name": "Not",
+    "method": "Match",
+    "pattern": "!"
+  },
+  {
+    "name": "BitwiseAnd",
+    "method": "Match",
+    "pattern": "&"
+  },
+  {
+    "name": "BitwiseOr",
+    "method": "Match",
+    "pattern": "|"
+  },
+  {
+    "name": "BitwiseXor",
+    "method": "Match",
+    "pattern": "^"
+  },
+  {
+    "name": "BitwiseNot",
+    "method": "Match",
+    "pattern": "~"
+  },
+  {
+    "name": "ShiftLeft",
+    "method": "Match",
+    "pattern": "<<"
+  },
+  {
+    "name": "ShiftRight",
+    "method": "Match",
+    "pattern": ">>"
+  }
+]
