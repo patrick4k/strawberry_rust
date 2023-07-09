@@ -1,15 +1,8 @@
-use std::cell::{Ref, RefCell};
-use std::env::remove_var;
-use std::mem::take;
 use std::path::Path;
-use std::ptr::replace;
 use crate::gen::tokens::Token;
 use crate::grammar::grammar::Grammar;
 use crate::interpreter::interpreter::{Interpreter, InterpreterResult};
-use crate::parser::ast::AST;
-use crate::parser::parser::{Parser, ParseResult, ParserVisitor, SubParseResult};
-use crate::parser::parser::ParseResult::Failure;
-use crate::strawberry::parser::rule::Script;
+use crate::strawberry::parser::ast::Script;
 use crate::strawberry::parser::script;
 
 pub struct StrawberryInterpreter {
@@ -27,13 +20,11 @@ impl StrawberryInterpreter {
         }
     }
 
-    pub fn exec(&mut self) {
+    pub fn exec(&mut self) -> InterpreterResult {
         if let Some(path) = &self.path.clone() {
-            self.execute_from_file(path.as_str());
+            return self.execute_from_file(path.as_str());
         }
-        else {
-            panic!("No path specified");
-        }
+        panic!("No path specified");
     }
 }
 
@@ -54,33 +45,18 @@ impl Interpreter for StrawberryInterpreter {
         }
     }
 
-    fn parse(&mut self, tokens: Vec<Token>) -> ParseResult {
-        let tokens = std::rc::Rc::new(RefCell::new(tokens));
+    fn parse(&mut self, tokens: Vec<Token>) -> Result<(), String> {
         let script_node= script::parse(tokens);
         match script_node {
-            SubParseResult::Success(node) => {
-                println!("SUCCESS: Parser successfully parsed stream");
-                self.ast = Some(node.rule);
-                return ParseResult::Success;
+            Ok(script) => {
+                self.ast = Some(script);
+                return Ok(());
             }
-            SubParseResult::Failure(msg) => {
-                Failure(msg)
-            }
+            Err(msg) => Err(msg)
         }
     }
 
     fn interpret(&mut self) -> InterpreterResult {
-        if let Some(script) = self.ast.clone() {
-            self.visit(script);
-        }
-        todo!()
-    }
-}
-
-type RetVal = i32;
-impl ParserVisitor<Script, RetVal> for StrawberryInterpreter {
-    fn visit(&mut self, rule: Script) -> RetVal {
-
-        todo!()
+        InterpreterResult::Failure("Interpreter not implemented".to_string())
     }
 }

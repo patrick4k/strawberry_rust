@@ -99,12 +99,6 @@ impl Lexer<'_> {
 fn get_match(name: &String, text: &str, stream: &String, logger: &mut Logger) -> MatchResult {
     if stream.starts_with(text) {
         let chars = text.len();
-
-        // let token = Token {
-        //     rule: LexerRule::Match { name: name.clone(), pattern: text.to_string() },
-        //     text: text[0..chars].to_string()
-        // };
-
         let text = text[0..chars].to_string();
         let token = Token::from(&*name, text.clone());
         logger.logln(format!("Matched: '{}' to {}", text, name).as_str());
@@ -117,10 +111,6 @@ fn get_regex_match(name: &String, regex: &Regex, stream: &String, capture: usize
     if let Some(caps) = regex.captures(&*stream) {
         let text = caps.get(capture).unwrap().as_str().to_string();
         let chars = caps.get(0).unwrap().as_str().len();
-        // let token = Token {
-        //     rule: LexerRule::RegexMatch { name: name.clone(), pattern: regex.clone() },
-        //     text
-        // };
         let token = Token::from(&*name, text.clone());
         logger.logln(format!("Matched: '{}' to {} = '{}'", text, name, regex.as_str()).as_str());
         return MatchResult::Matched{token, chars};

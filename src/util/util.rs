@@ -44,3 +44,22 @@ impl<T: Clone> ZeroOrMore<T> {
         }
     }
 }
+
+impl<T:Clone> Default for ZeroOrMore<T> {
+    fn default() -> Self {
+        ZeroOrMore::Zero
+    }
+}
+
+impl<T:Clone> ZeroOrMore<T> {
+    pub fn push(&mut self, val: T) {
+        match self {
+            ZeroOrMore::Zero => {
+                *self = ZeroOrMore::More(vec![val]);
+            },
+            ZeroOrMore::More(more) => {
+                more.push(val);
+            }
+        }
+    }
+}

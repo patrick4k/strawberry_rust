@@ -2,7 +2,7 @@ extern crate core;
 
 use std::env;
 use strawberry::strawberry_interpreter::StrawberryInterpreter;
-use crate::interpreter::interpreter::Interpreter;
+use crate::interpreter::interpreter::{Interpreter, InterpreterResult};
 
 mod lexer;
 mod logger;
@@ -16,8 +16,15 @@ mod gen;
 fn main() {
     let mut interpreter = StrawberryInterpreter::new();
 
-    let args: Vec<_> = env::args().collect();
+    let args = env::args().collect();
     interpreter.process_args(args);
 
-    interpreter.exec();
+    match interpreter.exec() {
+        InterpreterResult::Success => {
+            println!("SUCCESS: Interpreter successfully executed");
+        }
+        InterpreterResult::Failure(msg) => {
+            println!("ERROR: Interpreter failed to execute: {}", msg);
+        }
+    }
 }
